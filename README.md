@@ -5,7 +5,7 @@ Linux-only. Keeps captive-portal cafe wifi (Third Wave Coffee and other MikroTik
 Every minute (and right after waking from sleep) it:
 - hits `http://connectivitycheck.gstatic.com/generate_204`. The traffic keeps the session from going idle.
 - logs `online` / `offline` / `captive <login-url>`, plus the hotspot's `connected / left` timer if the router exposes one.
-- if you got kicked back to the login page, loads it the way a browser refresh would. Many portals (MikroTik mac-cookie) log you back in automatically from that. If they don't, you get a desktop notification with the login URL.
+- if you got kicked back to the login page, loads it once (some portals re-login from that alone). Still stuck? It opens the login page in your browser, once per drop. Set `WIFI_KEEPALIVE_ON_CAPTIVE=notify` in the service to get a desktop notification instead.
 
 ## Install
 
