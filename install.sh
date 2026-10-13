@@ -4,7 +4,7 @@
 set -eu
 BIN=$HOME/.local/bin/wifi-keepalive
 UNITS=${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user
-INTERVAL=${WIFI_KEEPALIVE_INTERVAL:-5min}
+INTERVAL=${WIFI_KEEPALIVE_INTERVAL:-minutely}
 
 if [ "${1:-}" = --uninstall ]; then
   systemctl --user disable --now wifi-keepalive.timer 2>/dev/null || true
@@ -30,8 +30,9 @@ cat > "$UNITS/wifi-keepalive.timer" <<UNIT
 [Unit]
 Description=Run wifi-keepalive every $INTERVAL
 [Timer]
-OnBootSec=1min
-OnUnitActiveSec=$INTERVAL
+# wall-clock timer so it fires right after resume from suspend
+OnCalendar=$INTERVAL
+AccuracySec=5s
 [Install]
 WantedBy=timers.target
 UNIT

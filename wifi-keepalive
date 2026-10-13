@@ -13,7 +13,14 @@ session=$(curl -s -m 5 "http://$gw/status" | tr -d '\n' | sed -n 's|.*connected 
 case $code in
   204) state=online ;;
   000) state=offline ;;
-  *)   state="captive ${portal:-http://$gw/}"
-       command -v notify-send >/dev/null && notify-send -u critical "Wifi needs login" "Open ${portal:-http://$gw/}" ;;
+  *)   # Many portals (MikroTik mac-cookie) re-login automatically when you just load the login page,
+       # which is what a browser refresh does. Do that, then check again.
+       curl -s -m 10 -L -o /dev/null "${portal:-http://$gw/}"
+       if [ "$(curl -s -m 10 -o /dev/null -w '%{http_code}' "$URL")" = 204 ]; then
+         state="relogged ${portal:-http://$gw/}"
+       else
+         state="captive ${portal:-http://$gw/}"
+         command -v notify-send >/dev/null && notify-send -u critical "Wifi needs login" "Open ${portal:-http://$gw/}"
+       fi ;;
 esac
 echo "$(date -Is) $state gw=$gw ${session:+session=\"$session\"}" | tee -a "$LOG"
